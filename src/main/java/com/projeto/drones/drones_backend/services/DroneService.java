@@ -3,9 +3,11 @@ package com.projeto.drones.drones_backend.services;
 import com.projeto.drones.drones_backend.models.Drone;
 import com.projeto.drones.drones_backend.repositories.DroneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 
@@ -35,8 +37,13 @@ public class DroneService {
         droneRepository.deleteById(id);
     }
 
-    public List<Drone> pesquisarDrones(Double precoMin, Double precoMax, Double autonomiaMin, Double autonomiaMax,
-                                       String fabricante, Double pesoMax, String sensores) {
+    public Page<Drone> pesquisarDrones(
+            Double precoMin, Double precoMax,
+            Double autonomiaMin, Double autonomiaMax,
+            String fabricante, Double pesoMax,
+            String sensores,
+            Pageable pageable) {
+
         Specification<Drone> spec = (root, query, cb) -> {
             Predicate predicate = cb.conjunction();
             if (precoMin != null) predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get("preco"), precoMin));
@@ -50,6 +57,6 @@ public class DroneService {
                 predicate = cb.and(predicate, cb.like(cb.lower(root.get("sensores")), "%" + sensores.toLowerCase() + "%"));
             return predicate;
         };
-        return droneRepository.findAll(spec);
+        return droneRepository.findAll(spec, pageable);
     }
 }

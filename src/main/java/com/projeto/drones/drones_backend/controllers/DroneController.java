@@ -3,10 +3,15 @@ package com.projeto.drones.drones_backend.controllers;
 import com.projeto.drones.drones_backend.models.Drone;
 import com.projeto.drones.drones_backend.services.DroneService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -65,16 +70,35 @@ public class DroneController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Drone>> pesquisarDrones(
+    public ResponseEntity<Map<String, Object>> pesquisarDrones(
             @RequestParam(required = false) Double precoMin,
             @RequestParam(required = false) Double precoMax,
             @RequestParam(required = false) Double autonomiaMin,
             @RequestParam(required = false) Double autonomiaMax,
             @RequestParam(required = false) String fabricante,
             @RequestParam(required = false) Double pesoMax,
-            @RequestParam(required = false) String sensores) {
-        List<Drone> drones = droneService.pesquisarDrones(precoMin, precoMax, autonomiaMin, autonomiaMax, fabricante, pesoMax, sensores);
-        return ResponseEntity.ok(drones);
+            @RequestParam(required = false) String sensores,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome,asc") String[] sort) {
+
+        // Configurar ordenação
+        String sortBy = sort[0];
+        String direction = (sort.length > 1 && sort[1].equalsIgnoreCase("desc")) ? "desc" : "asc";
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
+        // Chamar o serviço
+        Page<Drone> pageResult = droneService.pesquisarDrones(precoMin, precoMax, autonomiaMin, autonomiaMax, fabricante, pesoMax, sensores, pageable);
+
+        Map<String, Object> response = Map.of(
+                "drones", pageResult.getContent(),
+                "currentPage", pageResult.getNumber(),
+                "totalItems", pageResult.getTotalElements(),
+                "totalPages", pageResult.getTotalPages()
+        );
+        return ResponseEntity.ok(response);
     }
 
 
