@@ -1,5 +1,6 @@
 package com.projeto.drones.drones_backend.services;
 
+import com.projeto.drones.drones_backend.dto.DroneComparacaoDTO;
 import com.projeto.drones.drones_backend.models.Drone;
 import com.projeto.drones.drones_backend.repositories.DroneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.*;
 import java.util.List;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -58,5 +60,30 @@ public class DroneService {
             return predicate;
         };
         return droneRepository.findAll(spec, pageable);
+    }
+
+
+
+    public List<DroneComparacaoDTO> compararDrones(List<Long> ids) {
+        if (ids == null || ids.size() < 2) {
+            throw new IllegalArgumentException("Selecione pelo menos dois drones para comparar.");
+        }
+
+        List<Drone> drones = droneRepository.findAllById(ids);
+
+        if (drones.size() != ids.size()) {
+            throw new IllegalArgumentException("Um ou mais drones não foram encontrados.");
+        }
+
+        return drones.stream()
+                .map(d -> DroneComparacaoDTO.builder()
+                        .nome(d.getNome())
+                        .fabricante(d.getFabricante())
+                        .preco(d.getPreco())
+                        .autonomia(d.getAutonomia())
+                        .peso(d.getPeso())
+                        .sensores(d.getSensores())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

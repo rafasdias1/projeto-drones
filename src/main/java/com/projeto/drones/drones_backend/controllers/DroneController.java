@@ -1,5 +1,6 @@
 package com.projeto.drones.drones_backend.controllers;
 
+import com.projeto.drones.drones_backend.dto.DroneComparacaoDTO;
 import com.projeto.drones.drones_backend.models.Drone;
 import com.projeto.drones.drones_backend.services.DroneService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +28,21 @@ public class DroneController {
         return droneService.listarDrones();
     }
 
+
+
     @GetMapping("/{id}")
     public ResponseEntity<Drone> pesquisarPorId(@PathVariable long id){
         Optional<Drone> drone= droneService.pesquisarPorId(id);
         return drone.map(ResponseEntity::ok).orElseGet(()->ResponseEntity.notFound().build());
     }
 
+
     @PostMapping
     public ResponseEntity<Drone> guardar (@RequestBody Drone drone){
         return ResponseEntity.ok(droneService.guardar(drone));
     }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar (@PathVariable Long id){
         if(droneService.pesquisarPorId(id).isPresent()){
@@ -45,6 +51,8 @@ public class DroneController {
         }
         return ResponseEntity.notFound().build();
     }
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Drone> atualizarDrone(@PathVariable long id, @RequestBody Drone droneAtualizado){
@@ -68,6 +76,8 @@ public class DroneController {
             return ResponseEntity.notFound().build();
         }
     }
+
+
 
     @GetMapping("/search")
     public ResponseEntity<Map<String, Object>> pesquisarDrones(
@@ -99,6 +109,16 @@ public class DroneController {
                 "totalPages", pageResult.getTotalPages()
         );
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/comparar")
+    public ResponseEntity<?> compararDrones(@RequestBody List<Long> ids) {
+        try {
+            List<DroneComparacaoDTO> comparacao = droneService.compararDrones(ids);
+            return ResponseEntity.ok(comparacao);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 
