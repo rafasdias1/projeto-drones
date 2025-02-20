@@ -35,6 +35,8 @@ public class Drone {
 
     @Column(nullable = true)
     private String imagemUrl;
+
+
 }
 
 

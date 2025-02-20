@@ -4,6 +4,7 @@ package com.projeto.drones.drones_backend.controllers;
 import com.projeto.drones.drones_backend.dto.LoginDTO;
 import com.projeto.drones.drones_backend.models.Role;
 import com.projeto.drones.drones_backend.services.AutenticacaoService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +29,8 @@ public class AutenticacaoController {
         String token = autenticacaoService.autenticar(loginDTO.getEmail(), loginDTO.getPassword());
         return ResponseEntity.ok(Map.of("token", token));
     }
+
+
     @PostMapping("/register")
     public ResponseEntity<?> registar (@RequestBody Map<String, String> dados){
         String email= dados.get("email");

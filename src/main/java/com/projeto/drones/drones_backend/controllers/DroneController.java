@@ -3,11 +3,14 @@ package com.projeto.drones.drones_backend.controllers;
 import com.projeto.drones.drones_backend.dto.DroneComparacaoDTO;
 import com.projeto.drones.drones_backend.models.Drone;
 import com.projeto.drones.drones_backend.services.DroneService;
+import com.projeto.drones.drones_backend.services.PdfExportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +24,10 @@ public class DroneController {
 
     @Autowired
     private DroneService droneService;
+
+
+    @Autowired
+    private PdfExportService pdfExportService;
 
 
     @GetMapping
@@ -119,6 +126,19 @@ public class DroneController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/export/pdf")
+    public ResponseEntity<byte[]> exportarComparacaoPdf(@RequestParam List<Long> ids) {
+        List<Drone> drones = droneService.listarPorIds(ids);
+
+        byte[] pdf = pdfExportService.gerarPdfComparacao(drones);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=comparacao_drones.pdf");
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
+
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
 
 

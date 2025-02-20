@@ -27,6 +27,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/drones/search").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/drones/comparar").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/drones/export").permitAll()
 
                         .anyRequest().authenticated()
 

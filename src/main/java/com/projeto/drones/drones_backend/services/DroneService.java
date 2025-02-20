@@ -86,4 +86,9 @@ public class DroneService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public List<Drone> listarPorIds(List<Long> ids) {
+        return droneRepository.findAllById(ids);
+    }
+
 }
