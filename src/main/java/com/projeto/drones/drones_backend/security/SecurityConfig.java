@@ -28,6 +28,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/drones/search").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/drones/comparar").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/drones/export").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/airspaces").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/airspaces/geojson").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/airspaces/check").permitAll()
 
                         .anyRequest().authenticated()
 
