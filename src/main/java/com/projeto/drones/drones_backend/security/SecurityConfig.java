@@ -31,6 +31,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/airspaces").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/airspaces/geojson").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/airspaces/check").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/exemplos-drones").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/exemplos-drones/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/exemplos-drones/**").permitAll()
+
 
                         .anyRequest().authenticated()
 
