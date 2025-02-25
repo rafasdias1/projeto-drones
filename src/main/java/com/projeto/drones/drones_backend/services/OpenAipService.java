@@ -3,6 +3,8 @@ package com.projeto.drones.drones_backend.services;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +33,11 @@ public class OpenAipService {
 
 
     public Map<String, Object> checkFlightPermission(double latitude, double longitude) {
+
+
+        if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coordenadas inválidas! A latitude deve estar entre -90 e 90 e a longitude entre -180 e 180.");
+        }
         List<Map<String, Object>> airspaces = openAipApiClient.getAirspaces();
 
         for (Map<String, Object> airspace : airspaces) {
