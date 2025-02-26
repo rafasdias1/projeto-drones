@@ -4,6 +4,7 @@ import com.projeto.drones.drones_backend.models.ExemploDrone;
 import com.projeto.drones.drones_backend.services.ExemploDroneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +43,23 @@ public class ExemploDroneController {
         if (exemploDroneService.pesquisarPorId(id).isPresent()) {
             exemploDroneService.eliminar(id);
             return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+    // Atualizar um exemplo prático de drone
+    @PutMapping("/{id}")
+    public ResponseEntity<ExemploDrone> atualizarExemplo(@PathVariable Long id, @RequestBody ExemploDrone exemploAtualizado) {
+        Optional<ExemploDrone> exemploExistente = exemploDroneService.pesquisarPorId(id);
+
+        if (exemploExistente.isPresent()) {
+            ExemploDrone exemplo = exemploExistente.get();
+            exemplo.setNome(exemploAtualizado.getNome());
+            exemplo.setDescricao(exemploAtualizado.getDescricao());
+            exemplo.setCategoria(exemploAtualizado.getCategoria());
+            exemplo.setLinkDocumentacao(exemploAtualizado.getLinkDocumentacao());
+
+            ExemploDrone atualizado = exemploDroneService.guardar(exemplo);
+            return ResponseEntity.ok(atualizado);
         }
         return ResponseEntity.notFound().build();
     }

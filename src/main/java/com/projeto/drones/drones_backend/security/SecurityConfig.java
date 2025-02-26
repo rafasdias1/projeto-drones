@@ -19,22 +19,30 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/drones").hasRole("ADMIN")  // Apenas ADMIN pode criar drones
-                        .requestMatchers(HttpMethod.PUT, "/api/drones/**").hasRole("ADMIN")  // Apenas ADMIN pode editar drones
-                        .requestMatchers(HttpMethod.DELETE, "/api/drones/**").hasRole("ADMIN")  // Apenas ADMIN pode apagar drones
-                        .requestMatchers(HttpMethod.GET, "/api/drones/**").permitAll()  // Qualquer pessoa pode visualizar drones
+                        // 🟢 Endpoints de Autenticação (Login e Registro) - Qualquer um pode acessar
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/auth/register").permitAll()
+
+
+                        // 🟢 Endpoints de Drones - Somente ADMIN pode criar/editar/excluir, mas qualquer um pode visualizar
+                        .requestMatchers(HttpMethod.POST, "/api/drones").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/drones/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/drones/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/drones/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/drones/search").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/drones/comparar").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/drones/export").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/airspaces").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/airspaces/geojson").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/airspaces/check").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/drones/comparar").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/drones/export").permitAll()
+
+                        // 🟢 Endpoints de Zonas Aéreas - Qualquer um pode acessar
+                        .requestMatchers(HttpMethod.GET, "/api/airspaces").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/airspaces/geojson").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/airspaces/check").permitAll()
+
+                        // 🟢 Endpoints de Exemplos Práticos - Apenas ADMIN pode adicionar, editar e remover
                         .requestMatchers(HttpMethod.POST, "/api/exemplos-drones").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/exemplos-drones/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/exemplos-drones/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/exemplos-drones/**").permitAll()
-
 
                         .anyRequest().authenticated()
 
