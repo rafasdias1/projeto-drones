@@ -17,13 +17,28 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 🔹 Agora permite OPTIONS em tudo
+                        // ✅ PERMITIR OPTIONS PARA TODAS AS ROTAS (Evita bloqueios do navegador)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // 🟢 Endpoints de Autenticação
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
+
+                        // 🟢 Endpoints de Drones
+                        .requestMatchers(HttpMethod.GET, "/api/drones/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/drones").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/drones/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/drones/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/drones/**").permitAll()
+
+                        // 🟢 Endpoints de Zonas Aéreas
+                        .requestMatchers(HttpMethod.GET, "/api/airspaces/**").permitAll()
+
+                        // 🟢 Endpoints de Exemplos Práticos
+                        .requestMatchers(HttpMethod.GET, "/api/exemplos-drones/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/exemplos-drones").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/exemplos-drones/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/exemplos-drones/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .build();
