@@ -6,16 +6,13 @@ import com.projeto.drones.drones_backend.services.DroneService;
 import com.projeto.drones.drones_backend.services.PdfExportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -25,69 +22,40 @@ public class DroneController {
     @Autowired
     private DroneService droneService;
 
-
     @Autowired
     private PdfExportService pdfExportService;
 
-
+    // Endpoint para listar todos os drones
     @GetMapping
-    public List<Drone> listarDrones(){
+    public List<Drone> listarDrones() {
         return droneService.listarDrones();
     }
 
-
-
+    // Endpoint para buscar drone por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Drone> pesquisarPorId(@PathVariable long id){
-        Optional<Drone> drone= droneService.pesquisarPorId(id);
-        return drone.map(ResponseEntity::ok).orElseGet(()->ResponseEntity.notFound().build());
+    public ResponseEntity<Drone> buscarPorId(@PathVariable Long id) {
+        Optional<Drone> drone = droneService.pesquisarPorId(id);
+        return drone.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-
+    // Endpoint para criar ou atualizar drone
     @PostMapping
-    public ResponseEntity<Drone> guardar (@RequestBody Drone drone){
-        return ResponseEntity.ok(droneService.guardar(drone));
+    public ResponseEntity<Drone> criarOuAtualizarDrone(@RequestBody Drone drone) {
+        Drone savedDrone = droneService.guardar(drone);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDrone);
     }
 
-
+    // Endpoint para deletar drone por ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar (@PathVariable Long id){
-        if(droneService.pesquisarPorId(id).isPresent()){
-            droneService.eliminar(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> eliminarDrone(@PathVariable Long id) {
+        droneService.eliminar(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Drone> atualizarDrone(@PathVariable long id, @RequestBody Drone droneAtualizado){
-        Optional<Drone> droneExistente = droneService.pesquisarPorId(id);
-        if(droneExistente.isPresent()){
-            Drone drone= droneExistente.get();
-            drone.setNome(droneAtualizado.getNome());
-            drone.setFabricante(droneAtualizado.getFabricante());
-            drone.setPreco(droneAtualizado.getPreco());
-            drone.setAutonomia(droneAtualizado.getAutonomia());
-            drone.setPeso(droneAtualizado.getPeso());
-            drone.setSensores(droneAtualizado.getSensores());
-            drone.setDescricao(droneAtualizado.getDescricao());
-            drone.setImagemUrl(droneAtualizado.getImagemUrl());
-
-            Drone atualizado= droneService.guardar(drone);
-
-            return ResponseEntity.ok(atualizado);
-
-        }else{
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-
-
-    @GetMapping("/search")
-    public ResponseEntity<Map<String, Object>> pesquisarDrones(
+    // Endpoint para pesquisa avançada de drones com filtros
+    @GetMapping("/pesquisar")
+    public Page<Drone> pesquisarDrones(
             @RequestParam(required = false) Double precoMin,
             @RequestParam(required = false) Double precoMax,
             @RequestParam(required = false) Double autonomiaMin,
@@ -95,29 +63,12 @@ public class DroneController {
             @RequestParam(required = false) String fabricante,
             @RequestParam(required = false) Double pesoMax,
             @RequestParam(required = false) String sensores,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "nome,asc") String[] sort) {
-
-        // Configurar ordenação
-        String sortBy = sort[0];
-        String direction = (sort.length > 1 && sort[1].equalsIgnoreCase("desc")) ? "desc" : "asc";
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
-
-        // Chamar o serviço
-        Page<Drone> pageResult = droneService.pesquisarDrones(precoMin, precoMax, autonomiaMin, autonomiaMax, fabricante, pesoMax, sensores, pageable);
-
-        Map<String, Object> response = Map.of(
-                "drones", pageResult.getContent(),
-                "currentPage", pageResult.getNumber(),
-                "totalItems", pageResult.getTotalElements(),
-                "totalPages", pageResult.getTotalPages()
-        );
-        return ResponseEntity.ok(response);
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) Double alcanceMin,
+            @RequestParam(required = false) Double velocidadeMin,
+            Pageable pageable) {
+        return droneService.pesquisarDrones(precoMin, precoMax, autonomiaMin, autonomiaMax, fabricante, pesoMax, sensores, categoria, alcanceMin, velocidadeMin, pageable);
     }
-
     @PostMapping("/comparar")
     public ResponseEntity<?> compararDrones(@RequestBody List<Long> ids) {
         try {
@@ -128,6 +79,7 @@ public class DroneController {
         }
     }
 
+    // Método para exportar comparação em PDF
     @GetMapping("/export/pdf")
     public ResponseEntity<byte[]> exportarComparacaoPdf(@RequestParam List<Long> ids) {
         List<Drone> drones = droneService.listarPorIds(ids);
@@ -140,6 +92,5 @@ public class DroneController {
 
         return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
-
-
 }
+
