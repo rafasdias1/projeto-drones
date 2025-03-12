@@ -13,14 +13,22 @@ public class ExemploDrone {
     private Long id;
 
     @Column(nullable = false)
-    private String nome;
+    private String nome; // Nome do projeto
 
     @Column(nullable = false)
     private String categoria; // Ex: Agricultura, Segurança, Construção
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String descricao;
+    private String resumo; // Pequeno resumo antes da descrição
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String descricao; // Descrição detalhada do caso de uso
 
     @Column
-    private String linkDocumentacao; // URL de PDF ou artigo
+    private String imagemUrl; // URL da imagem ilustrativa
+
+    @Column
+    private String linkDocumentacao; // URL de PDF ou artigo técnico
+
+
 }

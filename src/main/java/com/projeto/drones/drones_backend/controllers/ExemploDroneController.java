@@ -17,49 +17,63 @@ public class ExemploDroneController {
     @Autowired
     private ExemploDroneService exemploDroneService;
 
+    // 🔹 Listar todos os exemplos de drones
     @GetMapping
     public ResponseEntity<List<ExemploDrone>> listarTodos() {
         return ResponseEntity.ok(exemploDroneService.listarTodos());
     }
 
+    // 🔹 Pesquisar por ID
     @GetMapping("/{id}")
     public ResponseEntity<ExemploDrone> pesquisarPorId(@PathVariable Long id) {
         Optional<ExemploDrone> exemplo = exemploDroneService.pesquisarPorId(id);
         return exemplo.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // 🔹 Pesquisar por categoria
     @GetMapping("/categoria")
     public ResponseEntity<List<ExemploDrone>> pesquisarPorCategoria(@RequestParam String categoria) {
         return ResponseEntity.ok(exemploDroneService.pesquisarPorCategoria(categoria));
     }
 
+    // 🔹 Criar um novo exemplo (Somente ADMIN)
     @PostMapping
-    public ResponseEntity<ExemploDrone> adicionar(@RequestBody ExemploDrone exemplo) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> adicionar(@RequestBody ExemploDrone exemplo) {
+        if (exemplo.getNome() == null || exemplo.getDescricao() == null || exemplo.getCategoria() == null) {
+            return ResponseEntity.badRequest().body("Todos os campos são obrigatórios.");
+        }
         return ResponseEntity.ok(exemploDroneService.guardar(exemplo));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        if (exemploDroneService.pesquisarPorId(id).isPresent()) {
-            exemploDroneService.eliminar(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
-    // Atualizar um exemplo prático de drone
+    // 🔹 Atualizar um exemplo (Somente ADMIN)
     @PutMapping("/{id}")
-    public ResponseEntity<ExemploDrone> atualizarExemplo(@PathVariable Long id, @RequestBody ExemploDrone exemploAtualizado) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> atualizarExemplo(@PathVariable Long id, @RequestBody ExemploDrone exemploAtualizado) {
         Optional<ExemploDrone> exemploExistente = exemploDroneService.pesquisarPorId(id);
 
         if (exemploExistente.isPresent()) {
             ExemploDrone exemplo = exemploExistente.get();
             exemplo.setNome(exemploAtualizado.getNome());
+            exemplo.setResumo(exemploAtualizado.getResumo()); // ✅ Adicionado
             exemplo.setDescricao(exemploAtualizado.getDescricao());
             exemplo.setCategoria(exemploAtualizado.getCategoria());
+            exemplo.setImagemUrl(exemploAtualizado.getImagemUrl()); // ✅ Adicionado
             exemplo.setLinkDocumentacao(exemploAtualizado.getLinkDocumentacao());
 
             ExemploDrone atualizado = exemploDroneService.guardar(exemplo);
             return ResponseEntity.ok(atualizado);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // 🔹 Deletar um exemplo (Somente ADMIN)
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        if (exemploDroneService.pesquisarPorId(id).isPresent()) {
+            exemploDroneService.eliminar(id);
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }
