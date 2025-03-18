@@ -31,7 +31,7 @@ public class DroneController {
         return droneService.listarDrones();
     }
 
-    // Endpoint para buscar drone por ID
+    // Endpoint para pesquisar drone por ID
     @GetMapping("/{id}")
     public ResponseEntity<Drone> buscarPorId(@PathVariable Long id) {
         Optional<Drone> drone = droneService.pesquisarPorId(id);
@@ -46,7 +46,7 @@ public class DroneController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDrone);
     }
 
-    // Endpoint para deletar drone por ID
+    // Endpoint para eliminar drone por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarDrone(@PathVariable Long id) {
         droneService.eliminar(id);
