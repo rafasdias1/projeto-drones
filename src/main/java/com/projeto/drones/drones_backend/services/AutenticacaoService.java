@@ -22,11 +22,16 @@ public class AutenticacaoService {
             "EstaÉUmaChaveMuitoLongaParaJWTComMaisDe32Bytes!".getBytes()
     );
 
-    @Autowired
+
     private UtilizadorRepository utilizadorRepository;
 
-    @Autowired
+
     private BCryptPasswordEncoder passwordEncoder;
+
+    public AutenticacaoService(UtilizadorRepository utilizadorRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.utilizadorRepository = utilizadorRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public String autenticar(String email, String password) {
         Optional<Utilizador> utilizador = utilizadorRepository.findByEmail(email);
